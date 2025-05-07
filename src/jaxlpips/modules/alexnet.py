@@ -18,4 +18,3 @@ class AlexNetFeatures(nnx.Module):
         act5 = nnx.relu(self.conv5(act4))
 
         return [act1, act2, act3, act4, act5]
-
