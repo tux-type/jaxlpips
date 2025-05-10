@@ -1,24 +1,41 @@
-from pathlib import Path
-from typing import Callable
+from typing import Callable, TypeVar
 
 import jax
 from flax import nnx
-from flax.traverse_util import flatten_dict, unflatten_dict
-from safetensors.flax import load_file, save_file
+from flax.traverse_util import unflatten_dict
+from huggingface_hub import hf_hub_download
+from safetensors.flax import load_file
+
+from jaxlpips.modules import AlexNetFeatures, VGG16Features
+
+ModelType = TypeVar("ModelType", bound=nnx.Module)
 
 
-def save_model(file_name: str | Path, model: nnx.Module | dict[str, jax.Array]):
-    state_dict = model if isinstance(model, dict) else nnx.state(model).to_pure_dict()
-    flat_dict: dict[str, jax.Array] = {
-        ".".join(k): v for k, v in flatten_dict(state_dict).items()
-    }  # type: ignore
-    save_file(tensors=flat_dict, filename=file_name)
+def load_model(model_name: str) -> tuple[AlexNetFeatures | VGG16Features, list[jax.Array]]:
+    match model_name:
+        case "alexnet":
+            model_class = AlexNetFeatures
+        case "vgg16":
+            model_class = VGG16Features
+        case _:
+            raise ValueError("Only 'alexnet' and 'vgg16' pretrained networks are supported.")
+
+    model_weights_file = hf_hub_download(
+        repo_id="tux-type/jaxlpips", filename=model_name + "_features.safetensors"
+    )
+    model_weights = load_file(model_weights_file)
+    linear_weights_file = hf_hub_download(
+        repo_id="tux-type/jaxlpips", filename=model_name + "_lpips.safetensors"
+    )
+    linear_weights = list(load_file(linear_weights_file).values())
+
+    model = to_nnx(model_weights, lambda: model_class(rngs=nnx.Rngs(0)))
+    return model, linear_weights
 
 
-def load_model(file_name: str, model: Callable[[], nnx.Module]) -> nnx.Module:
-    graph_def = nnx.graphdef(nnx.eval_shape(model))
-    flat_dict = load_file(file_name)
-    flat_dict = {tuple(k.split(".")): v for k, v in flat_dict.items()}
+def to_nnx(flat_weights: dict[str, jax.Array], lazy_model: Callable[[], ModelType]) -> ModelType:
+    graph_def = nnx.graphdef(nnx.eval_shape(lazy_model))
+    flat_dict = {tuple(k.split(".")): v for k, v in flat_weights.items()}
     state_dict = unflatten_dict(flat_dict)
     model = nnx.merge(graph_def, state_dict)
-    return model  # type: ignore
+    return model
