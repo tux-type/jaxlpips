@@ -10,6 +10,7 @@ TBD
 
 ## Why?
 There are already some LPIPS versions for JAX.
+
 This implementation provides:
 - Alexnet and VGG support
 - trimmed pretrained network parameters and calculations
