@@ -2,7 +2,7 @@
 
 LPIPS perceptual loss implementation for JAX.
 
-Information on the metric is available in the [original repo](https://github.com/richzhang/PerceptualSimilarity).
+Information on the metric is available in the [original repo](https://github.com/richzhang/PerceptualSimilarity).\
 Pretrained network and LPIPS linear weights are available on [Hugging Face](https://huggingface.co/tux-type/jaxlpips).
 
 ## Installation
