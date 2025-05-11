@@ -6,7 +6,10 @@ Information on the metric is available in the [original repo](https://github.com
 Pretrained network and LPIPS linear weights are available on [Hugging Face](https://huggingface.co/tux-type/jaxlpips).
 
 ## Installation
-TBD
+Install jaxlpips with:
+```sh
+pip install jaxlpips
+```
 
 ## Why?
 There are already some LPIPS versions for JAX.
