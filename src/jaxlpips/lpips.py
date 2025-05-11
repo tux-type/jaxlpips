@@ -7,6 +7,8 @@ from jaxlpips.utils import load_model
 
 class LPIPS:
     def __init__(self, pretrained_network: str = "alexnet"):
+        if pretrained_network == "alex":
+            pretrained_network = "alexnet"
         if pretrained_network == "vgg":
             pretrained_network = "vgg16"
 
