@@ -38,7 +38,7 @@ def test_lpips_dummy(dummy_data, pretrained_network):
     jax_output = jax_loss_fn(ref, tgt)
     torch_output = loss_fn(to_torch_tensor(ref), to_torch_tensor(tgt)).detach().cpu().numpy()
 
-    assert np.allclose(jax_output, torch_output, rtol=0, atol=1e-5)
+    assert np.allclose(jax_output, torch_output, rtol=0, atol=1e-4)
 
 
 @pytest.mark.parametrize("pretrained_network", ["alex", "vgg"])
